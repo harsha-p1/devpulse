@@ -1,27 +1,31 @@
 import express from "express";
 import axios from "axios";
-import { getGithubRepos } from "../controllers/githubRepoController";
 
 const router = express.Router();
 
-// GitHub User Info
 router.get("/:username", async (req, res) => {
   try {
-    const username = req.params.username;
+    const { username } = req.params;
 
-    const response = await axios.get(
+    const githubRes = await axios.get(
       `https://api.github.com/users/${username}`
     );
 
-    res.status(200).json(response.data);
-  } catch (error) {
+    const reposRes = await axios.get(
+      `https://api.github.com/users/${username}/repos`
+    );
+
+    res.json({
+      profile: githubRes.data,
+      repos: reposRes.data,
+    });
+  } catch (error: any) {
+    console.error("GitHub API Error:", error.message);
+
     res.status(500).json({
-      message: "GitHub user not found",
+      message: "Failed to fetch GitHub data",
     });
   }
 });
-
-// GitHub Repositories
-router.get("/:username/repos", getGithubRepos);
 
 export default router;
