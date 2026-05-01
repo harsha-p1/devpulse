@@ -3,19 +3,18 @@ import axios from "axios";
 
 const router = express.Router();
 
-// GitHub Profile
 router.get("/:username", async (req, res) => {
   try {
     const { username } = req.params;
 
-    const githubRes = await axios.get(
+    const githubUser = await axios.get(
       `https://api.github.com/users/${username}`
     );
 
-    res.json(githubRes.data);
+    res.json(githubUser.data);
 
-  } catch (error: any) {
-    console.error("GitHub Profile Error:", error.message);
+  } catch (error) {
+    console.log(error);
 
     res.status(500).json({
       message: "Failed to fetch GitHub profile",
@@ -23,19 +22,18 @@ router.get("/:username", async (req, res) => {
   }
 });
 
-// GitHub Repositories
 router.get("/:username/repos", async (req, res) => {
   try {
     const { username } = req.params;
 
-    const reposRes = await axios.get(
+    const githubRepos = await axios.get(
       `https://api.github.com/users/${username}/repos`
     );
 
-    res.json(reposRes.data);
+    res.json(githubRepos.data);
 
-  } catch (error: any) {
-    console.error("GitHub Repo Error:", error.message);
+  } catch (error) {
+    console.log(error);
 
     res.status(500).json({
       message: "Failed to fetch GitHub repos",
