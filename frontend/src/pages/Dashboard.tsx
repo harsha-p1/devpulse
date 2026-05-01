@@ -67,15 +67,20 @@ function Dashboard() {
     username: string
   ) => {
     try {
-      const res = await API.get(
+
+      // Fetch GitHub Profile
+      const userRes = await API.get(
         `/github/${username}`
       );
 
-      // User Data
-      setGithubData(res.data.user);
+      setGithubData(userRes.data);
 
-      // Repo Data
-      const sortedRepos = res.data.repos
+      // Fetch GitHub Repositories
+      const repoRes = await API.get(
+        `/github/${username}/repos`
+      );
+
+      const sortedRepos = repoRes.data
         .sort(
           (a: GithubRepo, b: GithubRepo) =>
             new Date(b.updated_at).getTime() -
@@ -86,6 +91,7 @@ function Dashboard() {
       setRepos(sortedRepos);
 
     } catch (error) {
+
       console.error(error);
 
       toast.error(
@@ -120,6 +126,7 @@ function Dashboard() {
       }
 
     } catch (error: unknown) {
+
       const err = error as {
         response?: {
           data?: { message?: string };
@@ -143,6 +150,7 @@ function Dashboard() {
   // Update Profile
   const updateProfile = async () => {
     try {
+
       await API.put("/profile", {
         bio,
         skills: skills
@@ -158,6 +166,7 @@ function Dashboard() {
       fetchProfile();
 
     } catch (error: unknown) {
+
       const err = error as {
         response?: {
           data?: { message?: string };
@@ -335,17 +344,20 @@ function Dashboard() {
                 <div className="flex flex-wrap gap-6 text-lg font-semibold mb-4">
 
                   <p>
-                    Followers:{" "}
+                    Followers:
+                    {" "}
                     {githubData.followers}
                   </p>
 
                   <p>
-                    Following:{" "}
+                    Following:
+                    {" "}
                     {githubData.following}
                   </p>
 
                   <p>
-                    Repos:{" "}
+                    Repos:
+                    {" "}
                     {githubData.public_repos}
                   </p>
 
@@ -402,7 +414,8 @@ function Dashboard() {
                     <div className="flex justify-between items-center">
 
                       <p>
-                        ⭐{" "}
+                        ⭐
+                        {" "}
                         {repo.stargazers_count}
                       </p>
 
