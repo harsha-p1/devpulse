@@ -6,6 +6,7 @@ const router = express.Router();
 const headers = {
   Accept: "application/vnd.github+json",
   "User-Agent": "DevPulse-App",
+  Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
 };
 
 router.get("/:username", async (req, res) => {
