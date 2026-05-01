@@ -35,12 +35,16 @@ interface GithubRepo {
 
 function Dashboard() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [githubData, setGithubData] = useState<GithubUser | null>(null);
+
+  const [githubData, setGithubData] =
+    useState<GithubUser | null>(null);
+
   const [repos, setRepos] = useState<GithubRepo[]>([]);
 
   const [bio, setBio] = useState("");
   const [skills, setSkills] = useState("");
-  const [githubUsername, setGithubUsername] = useState("");
+  const [githubUsername, setGithubUsername] =
+    useState("");
 
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -52,18 +56,26 @@ function Dashboard() {
   });
 
   useEffect(() => {
-    localStorage.setItem("darkMode", JSON.stringify(darkMode));
+    localStorage.setItem(
+      "darkMode",
+      JSON.stringify(darkMode)
+    );
   }, [darkMode]);
 
-  const fetchGithubData = async (username: string) => {
+  // Fetch GitHub Data
+  const fetchGithubData = async (
+    username: string
+  ) => {
     try {
-      const userRes = await API.get(`/github/${username}`);
+      const res = await API.get(
+        `/github/${username}`
+      );
 
-      setGithubData(userRes.data);
+      // User Data
+      setGithubData(res.data.user);
 
-      const repoRes = await API.get(`/github/${username}/repos`);
-
-      const sortedRepos = repoRes.data
+      // Repo Data
+      const sortedRepos = res.data.repos
         .sort(
           (a: GithubRepo, b: GithubRepo) =>
             new Date(b.updated_at).getTime() -
@@ -73,11 +85,16 @@ function Dashboard() {
 
       setRepos(sortedRepos);
 
-    } catch {
-      toast.error("Failed to load GitHub data ❌");
+    } catch (error) {
+      console.error(error);
+
+      toast.error(
+        "Failed to load GitHub data ❌"
+      );
     }
   };
 
+  // Fetch Profile
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -87,35 +104,50 @@ function Dashboard() {
       setProfile(res.data);
 
       setBio(res.data.bio || "");
-      setSkills(res.data.skills?.join(", ") || "");
-      setGithubUsername(res.data.githubUsername || "");
+
+      setSkills(
+        res.data.skills?.join(", ") || ""
+      );
+
+      setGithubUsername(
+        res.data.githubUsername || ""
+      );
 
       if (res.data.githubUsername) {
-        fetchGithubData(res.data.githubUsername);
+        fetchGithubData(
+          res.data.githubUsername
+        );
       }
 
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
+      const err = error as {
+        response?: {
+          data?: { message?: string };
+        };
+      };
+
       toast.error(
         err.response?.data?.message ||
           "Failed to load profile ❌"
       );
+
     } finally {
       setLoading(false);
     }
   }, []);
 
-  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
-  /* eslint-enable react-hooks/set-state-in-effect */
 
+  // Update Profile
   const updateProfile = async () => {
     try {
       await API.put("/profile", {
         bio,
-        skills: skills.split(",").map((skill) => skill.trim()),
+        skills: skills
+          .split(",")
+          .map((skill) => skill.trim()),
         githubUsername,
       });
 
@@ -126,7 +158,12 @@ function Dashboard() {
       fetchProfile();
 
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
+      const err = error as {
+        response?: {
+          data?: { message?: string };
+        };
+      };
+
       toast.error(
         err.response?.data?.message ||
           "Profile update failed ❌"
@@ -134,6 +171,7 @@ function Dashboard() {
     }
   };
 
+  // Logout
   const handleLogout = () => {
     localStorage.removeItem("token");
 
@@ -142,6 +180,7 @@ function Dashboard() {
     window.location.href = "/";
   };
 
+  // Loading Screen
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -168,7 +207,9 @@ function Dashboard() {
       {/* Navbar */}
       <nav
         className={`flex justify-between items-center px-6 py-4 shadow-md ${
-          darkMode ? "bg-gray-800" : "bg-white"
+          darkMode
+            ? "bg-gray-800"
+            : "bg-white"
         }`}
       >
 
@@ -186,7 +227,9 @@ function Dashboard() {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={() =>
+              setDarkMode(!darkMode)
+            }
             className="p-2 rounded-xl bg-gray-200 text-black"
           >
             {darkMode ? (
@@ -200,7 +243,9 @@ function Dashboard() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() =>
+              setIsEditing(!isEditing)
+            }
             className="bg-black text-white px-4 py-2 rounded-xl"
           >
             ✏️ Edit
@@ -227,7 +272,9 @@ function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className={`max-w-5xl mx-auto shadow-lg rounded-3xl p-6 md:p-10 ${
-            darkMode ? "bg-gray-800" : "bg-white"
+            darkMode
+              ? "bg-gray-800"
+              : "bg-white"
           }`}
         >
 
@@ -240,7 +287,9 @@ function Dashboard() {
 
             <p
               className={`text-lg ${
-                darkMode ? "text-gray-300" : "text-gray-600"
+                darkMode
+                  ? "text-gray-300"
+                  : "text-gray-600"
               }`}
             >
               {profile.email}
@@ -251,8 +300,14 @@ function Dashboard() {
           {/* GitHub Card */}
           {githubData && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{
+                opacity: 0,
+                scale: 0.9,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+              }}
               transition={{ duration: 0.5 }}
               className={`rounded-3xl p-6 mb-10 flex flex-col md:flex-row items-center gap-6 ${
                 darkMode
@@ -280,15 +335,18 @@ function Dashboard() {
                 <div className="flex flex-wrap gap-6 text-lg font-semibold mb-4">
 
                   <p>
-                    Followers: {githubData.followers}
+                    Followers:{" "}
+                    {githubData.followers}
                   </p>
 
                   <p>
-                    Following: {githubData.following}
+                    Following:{" "}
+                    {githubData.following}
                   </p>
 
                   <p>
-                    Repos: {githubData.public_repos}
+                    Repos:{" "}
+                    {githubData.public_repos}
                   </p>
 
                 </div>
@@ -319,8 +377,12 @@ function Dashboard() {
                 {repos.map((repo) => (
                   <motion.div
                     key={repo.id}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{
+                      scale: 1.03,
+                    }}
+                    whileTap={{
+                      scale: 0.98,
+                    }}
                     className={`rounded-2xl p-5 shadow-sm ${
                       darkMode
                         ? "bg-gray-700"
@@ -340,7 +402,8 @@ function Dashboard() {
                     <div className="flex justify-between items-center">
 
                       <p>
-                        ⭐ {repo.stargazers_count}
+                        ⭐{" "}
+                        {repo.stargazers_count}
                       </p>
 
                       <a
@@ -370,7 +433,9 @@ function Dashboard() {
             {isEditing ? (
               <textarea
                 value={bio}
-                onChange={(e) => setBio(e.target.value)}
+                onChange={(e) =>
+                  setBio(e.target.value)
+                }
                 className="w-full border rounded-xl p-4 text-black"
                 rows={4}
               />
@@ -390,14 +455,19 @@ function Dashboard() {
               <input
                 type="text"
                 value={skills}
-                onChange={(e) => setSkills(e.target.value)}
+                onChange={(e) =>
+                  setSkills(e.target.value)
+                }
                 className="w-full border rounded-xl p-4 text-black"
               />
             ) : (
               <div className="flex gap-3 flex-wrap">
 
                 {profile.skills?.map(
-                  (skill: string, index: number) => (
+                  (
+                    skill: string,
+                    index: number
+                  ) => (
                     <span
                       key={index}
                       className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full"
@@ -423,12 +493,16 @@ function Dashboard() {
                 type="text"
                 value={githubUsername}
                 onChange={(e) =>
-                  setGithubUsername(e.target.value)
+                  setGithubUsername(
+                    e.target.value
+                  )
                 }
                 className="w-full border rounded-xl p-4 text-black"
               />
             ) : (
-              <p>{profile.githubUsername}</p>
+              <p>
+                {profile.githubUsername}
+              </p>
             )}
           </div>
 
