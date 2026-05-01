@@ -13,14 +13,16 @@ dotenv.config();
 const app = express();
 
 // Middleware
-const corsOptions = {
-  origin: process.env.NODE_ENV === "production"
-    ? (process.env.FRONTEND_URL || "https://your-vercel-domain.vercel.app")
-    : true,
-  credentials: true,
-};
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.CLIENT_URL
+        : "http://localhost:5173",
+    credentials: true,
+  })
+);
 
-app.use(cors(corsOptions));
 app.use(express.json());
 
 // Database Connection
